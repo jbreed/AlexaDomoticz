@@ -1,0 +1,34 @@
+{
+  "intents": [
+    {
+      "intent": "LightsOn",
+      "slots": [
+        {
+          "name": "Light",
+          "type": "LIST_OF_LIGHTS"
+        }
+      ]
+    },
+    {
+      "intent": "LightsOff",
+      "slots": [
+        {
+          "name": "Light",
+          "type": "LIST_OF_LIGHTS"
+        }
+      ]
+    },
+    {
+      "intent": "TempChange",
+      "slots": [
+        {
+          "name": "Temp",
+          "type": "AMAZON.NUMBER"
+        }
+      ]
+    },
+    {
+      "intent": "CheckTemp"
+    }
+  ]
+}
