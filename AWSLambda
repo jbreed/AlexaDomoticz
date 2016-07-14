@@ -1,0 +1,276 @@
+var https = require('https');
+var url = 'https://USERNAME:PASSWORD@IPADDRESS:PORT'
+
+exports.handler = function (event, context) {
+    try {
+
+         if (event.session.application.applicationId !== "amzn1.echo-sdk-ams.app.XXXX-XXXX-XXXX-XXXX-XXXX") {
+             context.fail("Invalid Application ID");
+         }
+
+        if (event.session.new) {
+            onSessionStarted({requestId: event.request.requestId}, event.session);
+        }
+
+        if (event.request.type === "LaunchRequest") {
+            onLaunch(event.request,
+                     event.session,
+                     function callback(sessionAttributes, speechletResponse) {
+                        context.succeed(buildResponse(sessionAttributes, speechletResponse));
+                     });
+        }  else if (event.request.type === "IntentRequest") {
+            onIntent(event.request,
+                     event.session,
+                     function callback(sessionAttributes, speechletResponse) {
+                         context.succeed(buildResponse(sessionAttributes, speechletResponse));
+                     });
+        } else if (event.request.type === "SessionEndedRequest") {
+            onSessionEnded(event.request, event.session);
+            context.succeed();
+        }
+    } catch (e) {
+        context.fail("Exception: " + e);
+    }
+};
+
+
+function onSessionStarted(sessionStartedRequest, session) {
+    console.log("onSessionStarted requestId=" + sessionStartedRequest.requestId
+                + ", sessionId=" + session.sessionId);
+}
+
+
+function onLaunch(launchRequest, session, callback) {
+    console.log("onLaunch requestId=" + launchRequest.requestId
+                + ", sessionId=" + session.sessionId);
+
+    // Dispatch to your skill's launch.
+    getWelcomeResponse(callback);
+}
+
+
+function onIntent(intentRequest, session, callback) {
+    var intent = intentRequest.intent,
+        intentName = intentRequest.intent.name;
+    // Dispatch to your skill's intent handlers
+    if ("LightsOn" === intentName) {
+        setLightsOn(intent, session, callback);
+    } else if ("LightsOff" === intentName) {
+        setLightsOff(intent, session, callback);
+    } else if ("TempChange" == intentName) {
+        setThermostat(intent, session, callback);
+    } else if ("CheckTemp" == intentName) {
+        getTemperature(intent, session, callback);
+    } else {
+        throw "Invalid intent";
+    }
+}
+
+
+function onSessionEnded(sessionEndedRequest, session) {
+    console.log("onSessionEnded requestId=" + sessionEndedRequest.requestId
+                + ", sessionId=" + session.sessionId);
+    // Add cleanup logic here
+}
+
+// --------------- Functions that control the skill's behavior -----------------------
+
+function getWelcomeResponse(callback) {
+    // If we wanted to initialize the session to have some attributes we could add those here.
+    var sessionAttributes = {};
+    var cardTitle = "Welcome";
+    var speechOutput = "Welcome to Justin's home automation"
+
+    var repromptText = "Please give me a command such as the following, "
+                + "Alexa, tell my home to turn on the living room lights";
+
+    var shouldEndSession = false;
+
+    callback(sessionAttributes,
+             buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
+}
+
+function setLightsOn(intent, session, callback) {
+    var cardTitle = intent.name;
+    var slots = intent.slots;
+    var Light = intent.slots.Light.value;
+    var repromptText = "";
+    var sessionAttributes = {};
+    var shouldEndSession = true;
+    var speechOutput = "";
+
+    if (slots) {
+        var data = ''
+        if (Light == 'all'){
+            data = '/json.htm?type=command&param=switchscene&idx=19&switchcmd=On'
+        } else if (Light == 'master bedroom' || Light == 'bedroom'){
+            data = '/json.htm?type=command&param=switchscene&idx=2&switchcmd=On'
+        } else if (Light == 'hallway'){
+            data = '/json.htm?type=command&param=switchscene&idx=21&switchcmd=On'
+        } else if (Light == 'office'){
+            data = '/json.htm?type=command&param=switchscene&idx=20&switchcmd=On'
+        } else {
+            data = '/json.htm?type=command&param=switchscene&idx=15&switchcmd=On'
+        }
+
+        process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
+        https.get(url+data, function (result) {
+            //speechOutput = Light+"lights on";
+            repromptText = "Successfully turned on: ";
+            callback(sessionAttributes, buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
+        }).on('error', function (err) {
+            console.log('Error, with: ' + err.message);
+            speechOutput = "Sorry, but there was an error talking with the automation controller";
+            repromptText = "Error turning on ";
+            callback(sessionAttributes, buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
+        });
+
+    } else {
+        speechOutput = "Sorry";
+        repromptText = "Sorry";
+        callback(sessionAttributes,
+             buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
+    }    
+}
+
+function setLightsOff(intent, session, callback) {
+    
+    var cardTitle = intent.name;
+    var slots = intent.slots;
+    var Light = intent.slots.Light.value;
+    var repromptText = "";
+    var sessionAttributes = {};
+    var shouldEndSession = true;
+    var speechOutput = "";
+
+    if (slots) {
+        var data = ''
+        if (Light == 'all'){
+            data = '/json.htm?type=command&param=switchscene&idx=19&switchcmd=Off'
+        } else if (Light == 'master bedroom' || Light == 'bedroom'){
+            data = '/json.htm?type=command&param=switchscene&idx=2&switchcmd=Off'
+        } else if (Light == 'hallway'){
+            data = '/json.htm?type=command&param=switchscene&idx=21&switchcmd=Off'
+        } else if (Light == 'office'){
+            data = '/json.htm?type=command&param=switchscene&idx=20&switchcmd=Off'
+        } else {
+            data = '/json.htm?type=command&param=switchscene&idx=15&switchcmd=Off'            
+        }
+        process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
+        https.get(url+data, function (result) {
+            //speechOutput = Light+"lights off";
+            repromptText = "Successfully turned off";
+            callback(sessionAttributes, buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
+        }).on('error', function (err) {
+            console.log('Error, with: ' + err.message);
+            speechOutput = "Sorry, but there was an error talking with the automation controller";
+            repromptText = "Error turning off ";
+            callback(sessionAttributes, buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
+        });
+    } else {
+        speechOutput = "Sorry";
+        repromptText = "Sorry";
+        callback(sessionAttributes,
+             buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
+    }    
+}
+
+function setThermostat(intent, session, callback){
+    var cardTitle = intent.name;
+    var slots = intent.slots;
+    var Temperature = intent.slots.Temp.value;
+    var repromptText = "";
+    var sessionAttributes = {};
+    var shouldEndSession = true;
+    var speechOutput = "";
+
+    if (slots) {
+        var data = ''
+        if (65 < Temperature < 78){
+            data = '/json.htm?type=command&param=udevice&idx=13&nvalue=0&svalue='+Temperature;
+            process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
+            https.get(url+data, function (result) {
+                speechOutput = "The thermostat has been set to "+Temperature+" degrees";
+                repromptText = "Successfully set temp to: "+Temperature;
+                callback(sessionAttributes, buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
+            }).on('error', function (err) {
+                console.log('Error, with: ' + err.message);
+                speechOutput = "Sorry, but there was an error talking with the automation controller";
+                repromptText = "Error changing the temp";
+                callback(sessionAttributes, buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
+            });
+        } else {
+            speechOutput = "Sorry, but this temperature is outside of the operating range.";
+            repromptText = "Failed to set the temperature to "+Temperature;
+            callback(sessionAttributes, buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
+        }
+        
+    } else {
+        speechOutput = "Sorry";
+        repromptText = "Sorry";
+        callback(sessionAttributes,
+             buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
+    }    
+}
+
+function getTemperature(intent, session, callback) {
+    
+    var cardTitle = intent.name;
+    var repromptText = "";
+    var sessionAttributes = {};
+    var shouldEndSession = true;
+    var speechOutput = "";
+
+    var data = '/json.htm?type=devices&rid=13'
+
+    process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
+    https.get(url+data, function (res) {
+        
+        res.setEncoding('utf8');
+            res.on('data', function (data) {
+                var results = JSON.parse(data);
+                var setPoint = results.result[0].SetPoint
+                var currentTemp = results.result[0].Data
+                speechOutput = "The thermostat is set at "+setPoint+" degrees.";
+                repromptText = "Setpoint: "+setPoint;
+                callback(sessionAttributes, buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
+        });
+        
+    }).on('error', function (err) {
+        console.log('Error, with: ' + err.message);
+        speechOutput = "Sorry, but there was an error talking with the automation controller";
+        repromptText = "Error turning off ";
+        callback(sessionAttributes, buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
+    });
+
+}
+// --------------- Helpers that build all of the responses -----------------------
+
+function buildSpeechletResponse(title, output, repromptText, shouldEndSession) {
+    return {
+        outputSpeech: {
+            type: "PlainText",
+            text: output
+        },
+        card: {
+            type: "Simple",
+            title: "SessionSpeechlet - " + title,
+            content: "SessionSpeechlet - " + output
+        },
+        reprompt: {
+            outputSpeech: {
+                type: "PlainText",
+                text: repromptText
+            }
+        },
+        shouldEndSession: shouldEndSession
+    }
+}
+
+function buildResponse(sessionAttributes, speechletResponse) {
+    return {
+        version: "1.0",
+        sessionAttributes: sessionAttributes,
+        response: speechletResponse
+    }
+}
