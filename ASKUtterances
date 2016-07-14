@@ -1,0 +1,66 @@
+LightsOn turn on {Light} lights
+LightsOn turn on {Light} light
+LightsOn turn on the {Light} lights
+LightsOn turn on the {Light} light
+LightsOn turn on my {Light} lights
+LightsOn turn on my {Light} light
+LightsOn turn the lights on in the {Light}
+LightsOn turn the light on in the {Light}
+LightsOn {Light} lights on
+LightsOn {Light} light on
+LightsOn to turn the {Light} lights on
+LightsOn to turn the {Light} light on
+LightsOn turn on the lights for {Light}
+LightsOn turn on the lights for the {Light}
+LightsOn to turn on {Light} lights
+LightsOn to turn on {Light} light
+LightsOn to turn on my {Light} light
+LightsOn to turn on my {Light} lights
+LightsOn to turn on the {Light} lights
+LightsOn to turn on the {Light} light
+LightsOn to turn on {Light} the lights
+LightsOn to turn on {Light} the light
+LightsOn to turn on {Light} of the lights
+LightsOn to turn on {Light} of the light
+LightsOn to turn the lights on
+LightsOn to turn on the lights
+
+LightsOff turn off {Light} lights
+LightsOff turn off {Light} light
+LightsOff turn off the {Light} lights
+LightsOff turn off the {Light} light
+LightsOff turn the lights off in the {Light}
+LightsOff turn the light off in the {Light}
+LightsOff {Light} lights off
+LightsOff {Light} light off
+LightsOff to turn the {Light} lights off
+LightsOff to turn the {Light} light off
+LightsOff turn off the lights for {Light}
+LightsOff turn off the lights for the {Light}
+LightsOff to turn off {Light} lights
+LightsOff to turn off {Light} light
+LightsOff to turn off {Light} the lights
+LightsOff to turn off {Light} the light
+LightsOff to turn off {Light} of the lights
+LightsOff to turn off {Light} of the light
+LightsOff to turn off my {Light} light
+LightsOff to turn off my {Light} lights
+LightsOff to turn off the {Light} lights
+LightsOff to turn off the {Light} light
+LightsOff to turn the lights off
+LightsOff to turn off the lights
+LightsOff to turn off my lights
+
+CheckTemp what the temperature is inside my home
+CheckTemp what the temp is inside my home
+CheckTemp what the thermostat is set on
+CheckTemp what the thermostat is set to
+CheckTemp what is the inside temperature
+CheckTemp what is the temperature inside my home
+
+TempChange set my thermostat to {Temp} degrees
+TempChange set my thermostat to {Temp}
+TempChange set the thermostat to {Temp} degrees
+TempChange set the thermostat to {Temp}
+TempChange set the temperature to {Temp}
+TempChange set the temperature to {Temp} degrees
